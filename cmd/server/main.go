@@ -1,60 +1,52 @@
 package main
 
-import (
-	"fmt"
-	"net/http"
-	"youtubeAnalytics/pkg/handlers"
+// func init() {
+// 	gin.SetMode(gin.ReleaseMode)
+// }
 
-	"github.com/gin-gonic/gin"
-)
+// func main() {
+// 	routes := gin.Default()
+// 	routes.Use(CORSMiddleware())
 
-func init() {
-	gin.SetMode(gin.ReleaseMode)
-}
+// 	// test server connection
+// 	routes.GET("/ping", func(c *gin.Context) {
+// 		c.JSON(http.StatusOK, gin.H{
+// 			"message": "pong",
+// 		})
+// 	})
 
-func main() {
-	routes := gin.Default()
-	routes.Use(CORSMiddleware())
+// 	routes.GET("/", func(c *gin.Context) {
+// 		c.HTML(http.StatusOK, "welcome.html", gin.H{
+// 			"content": "welcome to youtube analytics",
+// 		})
+// 	})
 
-	// test server connection
-	routes.GET("/ping", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"message": "pong",
-		})
-	})
+// 	// svc routes
+// 	svc := routes.Group("/svc")
+// 	{
+// 		svc.GET("/get_insights", handlers.GetInsights)
+// 	}
 
-	routes.GET("/", func(c *gin.Context) {
-		c.HTML(http.StatusOK, "welcome.html", gin.H{
-			"content": "welcome to youtube analytics",
-		})
-	})
+// 	// run server
+// 	fmt.Println("server running on port.. :", 8080)
+// 	routes.Run(fmt.Sprintf(":%v", 8080))
+// }
 
-	// svc routes
-	svc := routes.Group("/svc")
-	{
-		svc.GET("/home", handlers.Home)
-	}
+// func CORSMiddleware() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		// c.Writer.Header().Set("Content-Type", "*; application/json; charset=utf-8; application/x-www-form-urlencoded;")
+// 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
+// 		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
+// 		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
+// 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie")
+// 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 
-	// run server
-	fmt.Println("server running on port.. :", 8080)
-	routes.Run(fmt.Sprintf(":%v", 8080))
-}
+// 		if c.Request.Method == "OPTIONS" {
+// 			c.AbortWithStatus(http.StatusOK)
+// 		} else {
+// 			c.Next()
+// 		}
 
-func CORSMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// c.Writer.Header().Set("Content-Type", "*; application/json; charset=utf-8; application/x-www-form-urlencoded;")
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Max-Age", "86400")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, GET")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, Cookie")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(http.StatusOK)
-		} else {
-			c.Next()
-		}
-
-		c.Next()
-	}
-}
+// 		c.Next()
+// 	}
+// }

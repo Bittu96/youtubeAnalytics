@@ -1868,3 +1868,5 @@ vendor/gopkg.in/yaml.v3/yamlh.go
 vendor/gopkg.in/yaml.v3/yamlprivateh.go
 coverage.txt
 tools/golangci-lint/golangci-lint
+bin/consumer
+bin/publisher

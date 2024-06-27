@@ -574,4 +574,6 @@ var stopwords = []string{
 	"yourselves",
 	"z",
 	"zero",
+	"updates", "facebook", "youtube", "follow", "twitter", "music", "producer", "instagram", "swapna", "http",
+	"com",
 }

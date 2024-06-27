@@ -32,6 +32,9 @@ Start the server
   npm run start
 ```
 
+	// systemctl start rabbitmq-server
+
+
 ## Additional References
 
 ### To get channels list :

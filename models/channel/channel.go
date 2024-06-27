@@ -9,7 +9,7 @@ import (
 	playlistCollecionAPI "youtubeAnalytics/pkg/youtube/apis/playlistCollection"
 )
 
-type channel struct {
+type Channel struct {
 	ChannelID       string              `json:"channel_id"`
 	SubscriberCount int64               `json:"subscriber_count"`
 	VideoCount      int64               `json:"video_count"`
@@ -18,18 +18,18 @@ type channel struct {
 	Playlists       []playlist.Playlist `json:"playlists"`
 }
 
-func New(channelId string) channel {
-	return channel{
+func New(channelId string) Channel {
+	return Channel{
 		ChannelID: channelId,
 	}
 }
 
-func (c channel) Load() (channel, error) {
+func (c Channel) Load() (Channel, error) {
 	channelAPIResponse, err := channelAPI.Request(c.ChannelID).MakeAPICall()
 	if err != nil {
-		return channel{}, err
+		return Channel{}, err
 	} else if len(channelAPIResponse.Items) == 0 {
-		return channel{}, nil
+		return Channel{}, nil
 	} else {
 		for _, channelItem := range channelAPIResponse.Items {
 			c.Details = channelItem.Snippet
@@ -39,22 +39,22 @@ func (c channel) Load() (channel, error) {
 				c.ViewCount, _ = strconv.ParseInt(channelItem.Statistics.ViewCount, 10, 64)
 			}
 			if err := rmq.RMQPublisherClient.Publish("channel", c); err != nil {
-				return channel{}, err
+				return Channel{}, err
 			}
 		}
 	}
 
 	if err = c.UploadsDownloader(channelAPIResponse.Items[0].ContentDetails.RelatedPlaylists.Uploads); err != nil {
-		return channel{}, err
+		return Channel{}, err
 	}
 
-	if err = c.loadAllPlaylists(); err != nil {
-		return channel{}, err
-	}
+	// if err = c.loadAllPlaylists(); err != nil {
+	// 	return Channel{}, err
+	// }
 	return c, nil
 }
 
-func (c *channel) loadAllPlaylists() error {
+func (c *Channel) loadAllPlaylists() error {
 	wg := &sync.WaitGroup{}
 	mux := &sync.Mutex{}
 	var nextPageToken string
@@ -88,7 +88,7 @@ func (c *channel) loadAllPlaylists() error {
 	return nil
 }
 
-func (c *channel) PlaylistDownloader(wg *sync.WaitGroup, mux *sync.Mutex, playlistId string) {
+func (c *Channel) PlaylistDownloader(wg *sync.WaitGroup, mux *sync.Mutex, playlistId string) {
 	defer func() { wg.Done() }()
 	newPlaylist, err := playlist.New(playlistId).Load()
 	if err != nil {
@@ -98,7 +98,7 @@ func (c *channel) PlaylistDownloader(wg *sync.WaitGroup, mux *sync.Mutex, playli
 	c.Playlists = append(c.Playlists, newPlaylist)
 }
 
-func (c *channel) UploadsDownloader(playlistId string) error {
+func (c *Channel) UploadsDownloader(playlistId string) error {
 	newPlaylist, err := playlist.New(playlistId).Load()
 	if err != nil {
 		return err
