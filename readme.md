@@ -9,14 +9,17 @@ A brief description of what this project does and who it's for
 ## Prerequisites
 
 
-Install Postgres on your machine
+Setup Postgres server
 
 https://www.redhat.com/sysadmin/postgresql-setup-use-cases
 
-Install RabbitMQ on your machine
+Setup RabbitMQ server
 
 https://www.cherryservers.com/blog/how-to-install-and-start-using-rabbitmq-on-ubuntu-22-04
 
+Create API key in GCP
+
+https://developers.google.com/youtube/v3/getting-started
 
 ## Setup
 
@@ -33,6 +36,12 @@ cd youtubeAnalytics
 ```
 
 Load schema from schema file
+
+```bash
+pkg/database/schema.sql
+```
+
+rename mock_env.file to .env and update env values
 
 ```bash
 pkg/database/schema.sql
