@@ -8,8 +8,14 @@ import (
 	"youtubeAnalytics/services"
 )
 
+// append target channels here
+var targetChannels = []string{
+	"UC5OrDvL9DscpcAstz7JnQGA",
+	"UC70pKToywlxOGdgIvz8gYqA",
+}
+
 func main() {
-	// connect to database
+	// connect and init dbClient
 	dbclient, err := database.New(configs.DBHost, configs.DBPort, configs.DBUser, configs.DBPass, configs.DBName).Connect()
 	if err != nil {
 		log.Fatal(err)
@@ -18,7 +24,7 @@ func main() {
 		defer dbclient.Close()
 	}
 
-	// connect to rmq
+	// connect and init rmq publisher client
 	rmq.RMQPublisherClient = rmq.New(configs.RMQURL, configs.QueueName)
 	if err := rmq.RMQPublisherClient.Connect(); err != nil {
 		log.Fatal(err)
@@ -27,17 +33,8 @@ func main() {
 		defer rmq.RMQPublisherClient.Close()
 	}
 
-	// append target channels
-	targetChannels := []string{
-		"UC5OrDvL9DscpcAstz7JnQGA",
-		"UC70pKToywlxOGdgIvz8gYqA",
-	}
+	// process target channels
+	services.ProcessChannels(targetChannels)
 
-	// get video data of target channels
-	services.LoadChannels(targetChannels)
-
-	// get video insights
-	if err := services.GenerateVideoInsights(); err != nil {
-		panic(err)
-	}
+	log.Println("main end")
 }

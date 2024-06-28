@@ -1,5 +1,7 @@
 package keyword
 
+// add new stopwords to this list
+// later convert to a map
 var stopwords = []string{
 	"a",
 	"a's",

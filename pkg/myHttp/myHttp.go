@@ -27,11 +27,13 @@ func NewRequest(method, url string, params interface{}) request {
 }
 
 func (r request) Do() ([]byte, error) {
+	// create http request from params
 	req, err := r.createHTTPRequest()
 	if err != nil {
 		return nil, err
 	}
 
+	// do http call with retries
 	res, err := doWithRetries(req)
 	if err != nil {
 		return nil, err
@@ -84,6 +86,7 @@ func doWithRetries(req *http.Request) (*http.Response, error) {
 	return res, err
 }
 
+// check retry condition
 func shouldRetryConnection(res *http.Response, err error) bool {
 	if err != nil {
 		return true

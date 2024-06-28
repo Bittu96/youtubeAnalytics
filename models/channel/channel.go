@@ -3,6 +3,7 @@ package channel
 import (
 	"strconv"
 	"sync"
+	"youtubeAnalytics/configs"
 	"youtubeAnalytics/models/playlist"
 	"youtubeAnalytics/pkg/rmq"
 	channelAPI "youtubeAnalytics/pkg/youtube/apis/channel"
@@ -18,13 +19,16 @@ type Channel struct {
 	Playlists       []playlist.Playlist `json:"playlists"`
 }
 
+// create new channel
 func New(channelId string) Channel {
 	return Channel{
 		ChannelID: channelId,
 	}
 }
 
-func (c Channel) Load() (Channel, error) {
+// download channel info and all it's uploads/plylists
+func (c Channel) Download() (Channel, error) {
+	// calling youtube Data API
 	channelAPIResponse, err := channelAPI.Request(c.ChannelID).MakeAPICall()
 	if err != nil {
 		return Channel{}, err
@@ -38,27 +42,35 @@ func (c Channel) Load() (Channel, error) {
 				c.VideoCount, _ = strconv.ParseInt(channelItem.Statistics.VideoCount, 10, 64)
 				c.ViewCount, _ = strconv.ParseInt(channelItem.Statistics.ViewCount, 10, 64)
 			}
+
+			// push channel info to consumer
 			if err := rmq.RMQPublisherClient.Publish("channel", c); err != nil {
 				return Channel{}, err
 			}
 		}
 	}
 
+	// download all videos from only channel uploads section by default
 	if err = c.UploadsDownloader(channelAPIResponse.Items[0].ContentDetails.RelatedPlaylists.Uploads); err != nil {
 		return Channel{}, err
 	}
 
-	// if err = c.loadAllPlaylists(); err != nil {
-	// 	return Channel{}, err
-	// }
+	// download all videos from playlist sections if enabled
+	if configs.LoadVideosFromPlaylists {
+		if err = c.downloadAllPlaylists(); err != nil {
+			return Channel{}, err
+		}
+	}
+
 	return c, nil
 }
 
-func (c *Channel) loadAllPlaylists() error {
+func (c *Channel) downloadAllPlaylists() error {
 	wg := &sync.WaitGroup{}
 	mux := &sync.Mutex{}
 	var nextPageToken string
 
+	// calling youtube Data API
 	playlistCollectionAPIResponse, err := playlistCollecionAPI.Request(c.ChannelID).MakeAPICall()
 	if err != nil {
 		return err
@@ -71,7 +83,9 @@ func (c *Channel) loadAllPlaylists() error {
 		wg.Wait()
 	}
 
+	// if multiple pages exist
 	for nextPageToken != "" {
+		// calling youtube Data API for next page
 		playlistCollectionAPIResponse, err := playlistCollecionAPI.Request(c.ChannelID).GetPage(nextPageToken).MakeAPICall()
 		if err != nil {
 			return err
@@ -88,9 +102,10 @@ func (c *Channel) loadAllPlaylists() error {
 	return nil
 }
 
+// download playlist data
 func (c *Channel) PlaylistDownloader(wg *sync.WaitGroup, mux *sync.Mutex, playlistId string) {
 	defer func() { wg.Done() }()
-	newPlaylist, err := playlist.New(playlistId).Load()
+	newPlaylist, err := playlist.New(playlistId).Download()
 	if err != nil {
 		return
 	}
@@ -98,8 +113,9 @@ func (c *Channel) PlaylistDownloader(wg *sync.WaitGroup, mux *sync.Mutex, playli
 	c.Playlists = append(c.Playlists, newPlaylist)
 }
 
+// download uploads data
 func (c *Channel) UploadsDownloader(playlistId string) error {
-	newPlaylist, err := playlist.New(playlistId).Load()
+	newPlaylist, err := playlist.New(playlistId).Download()
 	if err != nil {
 		return err
 	}

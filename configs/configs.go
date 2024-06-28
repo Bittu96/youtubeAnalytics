@@ -9,19 +9,27 @@ import (
 )
 
 var (
+	// youtube API creds
 	YoutubeDataAPIBaseURL                = getEnv("YoutubeDataAPIBaseURL").val
 	YouTubeDataAPIChannelsPath           = getEnv("YouTubeDataAPIChannelsPath").val
 	YouTubeDataAPIPlaylistCollectionPath = getEnv("YouTubeDataAPIPlaylistCollectionPath").val
 	YouTubeDataAPIPlaylistItemsPath      = getEnv("YouTubeDataAPIPlaylistItemsPath").val
 	YouTubeDataAPIVideosPath             = getEnv("YouTubeDataAPIVideosPath").val
 	YoutubeDataAPIKey                    = getEnv("YoutubeDataAPIKey").val
-	RMQURL                               = getEnv("RMQURL").val
-	QueueName                            = getEnv("QueueName").val
-	DBHost                               = getEnv("DBHost").val
-	DBPort                               = getEnv("DBPort").ToInt()
-	DBUser                               = getEnv("DBUser").val
-	DBPass                               = getEnv("DBPass").val
-	DBName                               = getEnv("DBName").val
+
+	// rmq creds
+	RMQURL    = getEnv("RMQURL").val
+	QueueName = getEnv("QueueName").val
+
+	// db creds
+	DBHost = getEnv("DBHost").val
+	DBPort = getEnv("DBPort").ToInt()
+	DBUser = getEnv("DBUser").val
+	DBPass = getEnv("DBPass").val
+	DBName = getEnv("DBName").val
+
+	// flags
+	LoadVideosFromPlaylists = getEnv("LoadVideosFromPlaylists").ToBool()
 )
 
 func LoadEnvs() {

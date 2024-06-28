@@ -2,10 +2,7 @@ module youtubeAnalytics
 
 go 1.22.0
 
-require (
-	github.com/lib/pq v1.10.9
-	github.com/redis/go-redis/v9 v9.5.3
-)
+require github.com/lib/pq v1.10.9
 
 require (
 	github.com/bytedance/sonic v1.11.6 // indirect
@@ -37,8 +34,6 @@ require (
 )
 
 require (
-	github.com/cespare/xxhash/v2 v2.2.0 // indirect
-	github.com/dgryski/go-rendezvous v0.0.0-20200823014737-9f7001d12a5f // indirect
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-echarts/go-echarts/v2 v2.3.3
 	github.com/google/uuid v1.6.0

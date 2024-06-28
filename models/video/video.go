@@ -17,13 +17,15 @@ type Video struct {
 	Details     videoAPI.Snippet `json:"details"`
 }
 
+// create new video
 func New(videoId string) Video {
 	return Video{
 		VideoID: videoId,
 	}
 }
 
-func (v Video) Load() (Video, error) {
+// download video info
+func (v Video) Download() (Video, error) {
 	videoAPIResponse, err := videoAPI.Request(v.VideoID).MakeAPICall()
 	if err != nil {
 		return Video{}, err
@@ -39,6 +41,7 @@ func (v Video) Load() (Video, error) {
 		}
 	}
 
+	// push video info to consumer
 	if err := rmq.RMQPublisherClient.Publish("video", v); err != nil {
 		log.Println(err)
 	}

@@ -3,7 +3,7 @@ TOOLS_DIR := tools
 
 default: all
 
-all: clean lint test build 
+all: clean lint test build-consumer build-publisher
 
 .PHONY: $(BUILD_DIR)/publisher
 bin/publisher: cmd/publisher/*.go
@@ -13,9 +13,19 @@ bin/publisher: cmd/publisher/*.go
 bin/consumer: cmd/consumer/*.go
 	CGO_ENABLED=0 go build -mod vendor -ldflags="-s -w" -o ./bin/consumer ./cmd/consumer/
 
-.PHONY: build
-build: bin/publisher
-build: bin/consumer
+.PHONY: build-publisher
+build-publisher: bin/publisher
+
+.PHONY: build-consumer
+build-consumer: bin/consumer
+
+.PHONY: run-publisher
+run-publisher: build-publisher
+	bin/publisher
+
+.PHONY: run-consumer
+run-consumer: build-consumer
+	bin/consumer
 
 .PHONY: clean
 clean:
@@ -23,14 +33,6 @@ clean:
 	rm -rf $(TOOLS_DIR)
 	@go mod vendor
 	@go mod tidy
-
-.PHONY: runPublisher
-runPublisher: build
-	bin/publisher
-
-.PHONY: runConsumer
-runConsumer: build
-	bin/consumer
 
 tools/golangci-lint/golangci-lint:
 	mkdir -p tools/

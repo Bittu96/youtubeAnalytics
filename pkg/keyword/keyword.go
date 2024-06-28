@@ -26,9 +26,6 @@ func filterOutSpecialWords(text string) (filteredWords []string) {
 	special := regexp.MustCompile("\\.|,|;|!|\\?|\\(|\\)|:|\"|\\^'|\\$|<|>|-|\\/|\\*|“|”|‘|’|”")
 	text = special.ReplaceAllString(text, " ")
 
-	skip := regexp.MustCompile("http://|.com")
-	text = skip.ReplaceAllString(text, " ")
-
 	keywordsV0 := strings.Fields(text)
 	if len(keywordsV0) == 0 {
 		return nil

@@ -10,6 +10,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// global db client variable
 var DBClient *sql.DB
 
 type database struct {
@@ -20,6 +21,7 @@ type database struct {
 	dbname   string
 }
 
+// create new db
 func New(host string, port int, user, password, dbname string) database {
 	return database{
 		host:     host,
@@ -30,6 +32,7 @@ func New(host string, port int, user, password, dbname string) database {
 	}
 }
 
+// connect to database
 func (db database) Connect() (*sql.DB, error) {
 	_, cancel := context.WithTimeout(context.Background(), 20*time.Second)
 	defer cancel()
@@ -53,6 +56,7 @@ func (db database) Connect() (*sql.DB, error) {
 	fmt.Println("psqlConnectionString:", psqlConnectionString)
 
 	var err error
+
 	// open database
 	DBClient, err = sql.Open("postgres", psqlConnectionString)
 	if err != nil {

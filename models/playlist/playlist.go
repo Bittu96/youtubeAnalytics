@@ -16,14 +16,18 @@ type Playlist struct {
 	Videos     []video.Video           `json:"videos"`
 }
 
+// craete new playlist
 func New(playlistId string) Playlist {
 	return Playlist{
 		PlaylistID: playlistId,
 	}
 }
 
-func (p Playlist) Load() (Playlist, error) {
+// download playlist info and all it's videos
+func (p Playlist) Download() (Playlist, error) {
 	var nextPageToken string
+
+	// calling youtube Data API
 	playlistItemAPIResponse, err := playlistItemAPI.Request(p.PlaylistID).MakeAPICall()
 	if err != nil {
 		return Playlist{}, err
@@ -40,7 +44,9 @@ func (p Playlist) Load() (Playlist, error) {
 		p.loadAllVideos(playlistItemAPIResponse.Items)
 	}
 
+	// if multiple pages exist
 	for nextPageToken != "" {
+		// calling youtube Data API for next page
 		playlistItemAPIResponse, err := playlistItemAPI.Request(p.PlaylistID).SetPage(nextPageToken).MakeAPICall()
 		if err != nil {
 			return Playlist{}, err
@@ -50,6 +56,7 @@ func (p Playlist) Load() (Playlist, error) {
 		}
 	}
 
+	// validate download video count with actual playlist video count
 	if p.VideoCount != int64(len(p.Videos)) {
 		log.Println("playlist couldn't fetch all videos", p.VideoCount, len(p.Videos))
 	}
@@ -57,6 +64,7 @@ func (p Playlist) Load() (Playlist, error) {
 	return p, nil
 }
 
+// download all video from a playlists
 func (p *Playlist) loadAllVideos(playlistItems []playlistItemAPI.Item) {
 	wg := &sync.WaitGroup{}
 	mux := &sync.Mutex{}
@@ -67,12 +75,13 @@ func (p *Playlist) loadAllVideos(playlistItems []playlistItemAPI.Item) {
 	wg.Wait()
 }
 
+// download video info
 func (p *Playlist) videoDownloader(wg *sync.WaitGroup, mux *sync.Mutex, videoId string) {
 	defer func() {
 		wg.Done()
 	}()
 
-	videoData, err := video.New(videoId).Load()
+	videoData, err := video.New(videoId).Download()
 	if err != nil {
 		return
 	} else {

@@ -15,6 +15,30 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
+type channel struct {
+	ChannelID       string             `json:"channel_id"`
+	SubscriberCount int64              `json:"subscriber_count"`
+	VideoCount      int64              `json:"video_count"`
+	ViewCount       int64              `json:"view_count"`
+	Details         channelAPI.Snippet `json:"details"`
+}
+
+type playlist struct {
+	PlaylistID string                  `json:"playlist_id"`
+	ChannelID  string                  `json:"channel_id"`
+	VideoCount int64                   `json:"video_count"`
+	Details    playlistItemAPI.Snippet `json:"details"`
+}
+
+type video struct {
+	VideoID     string           `json:"video_id"`
+	Views       int64            `json:"views"`
+	Likes       int64            `json:"likes"`
+	Comments    int64            `json:"comments"`
+	PublishedAt time.Time        `json:"published_at"`
+	Details     videoAPI.Snippet `json:"details"`
+}
+
 var (
 	RMQConsumerClient *RMQ
 	dataConsumerCount int = 3
@@ -29,6 +53,7 @@ func (r *RMQ) StartConsumer() {
 
 	var forever chan struct{}
 
+	// start consumer routines
 	for i := 0; i < dataConsumerCount; i++ {
 		go dataConsumer(i, msgs)
 	}
@@ -57,30 +82,6 @@ func writeToDB(entity string, data amqp091.Delivery) {
 	default:
 		log.Println("unknown entity")
 	}
-}
-
-type channel struct {
-	ChannelID       string             `json:"channel_id"`
-	SubscriberCount int64              `json:"subscriber_count"`
-	VideoCount      int64              `json:"video_count"`
-	ViewCount       int64              `json:"view_count"`
-	Details         channelAPI.Snippet `json:"details"`
-}
-
-type playlist struct {
-	PlaylistID string                  `json:"playlist_id"`
-	ChannelID  string                  `json:"channel_id"`
-	VideoCount int64                   `json:"video_count"`
-	Details    playlistItemAPI.Snippet `json:"details"`
-}
-
-type video struct {
-	VideoID     string           `json:"video_id"`
-	Views       int64            `json:"views"`
-	Likes       int64            `json:"likes"`
-	Comments    int64            `json:"comments"`
-	PublishedAt time.Time        `json:"published_at"`
-	Details     videoAPI.Snippet `json:"details"`
 }
 
 func writeChannelDataToDB(data []byte) {
@@ -122,6 +123,9 @@ func runQuery(query string) {
 	res, err := database.DBClient.Exec(query)
 	if err != nil {
 		// log.Println(query)
+		if res == nil {
+			panic(err)
+		}
 		log.Println(err)
 	} else {
 		log.Println("row inserted", res)
