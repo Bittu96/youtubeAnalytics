@@ -38,7 +38,7 @@ func (p Playlist) Download() (Playlist, error) {
 		p.VideoCount = playlistItemAPIResponse.PageInfo.TotalResults
 		p.Details = playlistItemAPIResponse.Items[0].Snippet
 		p.ChannelID = playlistItemAPIResponse.Items[0].Snippet.ChannelID
-		if err := rmq.RMQPublisherClient.Publish("playlist", p); err != nil {
+		if err := rmq.GetClient().Publish("playlist", p); err != nil {
 			log.Println(err)
 		}
 		p.loadAllVideos(playlistItemAPIResponse.Items)

@@ -1,7 +1,6 @@
 package database
 
 import (
-	"context"
 	"database/sql"
 	"fmt"
 	"log"
@@ -10,42 +9,32 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// global db client variable
-var DBClient *sql.DB
-
-type database struct {
+type DB struct {
 	host     string
 	port     int
 	user     string
 	password string
 	dbname   string
+	conn     *sql.DB
 }
 
+// global db client variable
+var dbClient *DB
+
 // create new db
-func New(host string, port int, user, password, dbname string) database {
-	return database{
+func New(host string, port int, user, password, dbname string) {
+	dbClient = &DB{
 		host:     host,
 		port:     port,
 		user:     user,
 		password: password,
 		dbname:   dbname,
 	}
+	fmt.Println(dbClient)
 }
 
 // connect to database
-func (db database) Connect() (*sql.DB, error) {
-	_, cancel := context.WithTimeout(context.Background(), 20*time.Second)
-	defer cancel()
-
-	fmt.Println("postgres creds", db)
-	// if DBClient != nil {
-	// 	// db.Connect()
-	// 	// todo
-	// 	// add nil test
-	// 	// add ping test
-	// 	// add auto retries
-	// }
-
+func (db *DB) Connect() (err error) {
 	// connection string
 	psqlConnectionString := fmt.Sprintf("host=%s port=%d user=%s password=%s dbname=%s sslmode=disable",
 		db.host,
@@ -53,24 +42,41 @@ func (db database) Connect() (*sql.DB, error) {
 		db.user,
 		db.password,
 		db.dbname)
-	fmt.Println("psqlConnectionString:", psqlConnectionString)
-
-	var err error
 
 	// open database
-	DBClient, err = sql.Open("postgres", psqlConnectionString)
+	db.conn, err = sql.Open("postgres", psqlConnectionString)
 	if err != nil {
 		fmt.Println("postgres connection failed!", err)
-		log.Fatal("postgres connection failed!", err)
-		return DBClient, err
+		return err
 	}
 
 	// check db
-	if err = DBClient.Ping(); err != nil {
-		fmt.Println("postgres connection failed!", err)
-		return DBClient, err
+	if err = db.conn.Ping(); err != nil {
+		log.Println("postgres ping failed!", err)
+		return err
 	}
 
-	fmt.Println("postgres connection success!")
-	return DBClient, err
+	log.Println("postgres connection success!")
+	return err
+}
+
+func GetClient() *sql.DB {
+	if dbClient.conn == nil {
+		for dbClient.Connect() != nil {
+			time.Sleep(time.Second)
+		}
+	}
+
+	return dbClient.conn
+}
+
+func CloseClient() {
+	if dbClient.conn == nil {
+		log.Println("postgres connection already closed!")
+		return
+	}
+
+	if err := dbClient.conn.Close(); err != nil {
+		log.Println("postgres connection close failed!")
+	}
 }

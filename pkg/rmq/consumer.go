@@ -39,13 +39,10 @@ type video struct {
 	Details     videoAPI.Snippet `json:"details"`
 }
 
-var (
-	RMQConsumerClient *RMQ
-	dataConsumerCount int = 3
-)
+const dataConsumerCount int = 10
 
 func (r *RMQ) StartConsumer() {
-	msgs, err := r.rmqChannel.Consume(r.queue.Name, "", true, false, false, false, nil)
+	msgs, err := r.channel.Consume(r.queue.Name, "", true, false, false, false, nil)
 	if err != nil {
 		log.Fatal("Failed to register a consumer")
 		return
@@ -120,12 +117,9 @@ func writeVideoDataToDB(data []byte) {
 }
 
 func runQuery(query string) {
-	res, err := database.DBClient.Exec(query)
+	res, err := database.GetClient().Exec(query)
 	if err != nil {
 		// log.Println(query)
-		if res == nil {
-			panic(err)
-		}
 		log.Println(err)
 	} else {
 		log.Println("row inserted", res)

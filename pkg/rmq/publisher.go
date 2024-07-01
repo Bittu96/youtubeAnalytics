@@ -9,16 +9,7 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-var (
-	RMQPublisherClient *RMQ
-)
-
 func (r *RMQ) Publish(entity string, msg interface{}) error {
-	if err := r.Connect(); err != nil {
-		log.Println("Failed to Connect to queue")
-		return err
-	}
-
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -33,13 +24,13 @@ func (r *RMQ) Publish(entity string, msg interface{}) error {
 		Type:        entity,
 	}
 
-	if err = r.rmqChannel.PublishWithContext(ctx, "", r.queueName, false, false, publishMessage); err != nil {
+	if err = r.channel.PublishWithContext(ctx, "", r.queueName, false, false, publishMessage); err != nil {
 		log.Println(err)
 	}
 	for i := 0; i < maxRetryCount && shouldRetryPublisher(err); i++ {
 		log.Println("retrying PublishWithContext...")
 		time.Sleep(retryInterval)
-		if err = r.rmqChannel.PublishWithContext(ctx, "", r.queueName, false, false, publishMessage); err != nil {
+		if err = r.channel.PublishWithContext(ctx, "", r.queueName, false, false, publishMessage); err != nil {
 			log.Println(err)
 		}
 	}

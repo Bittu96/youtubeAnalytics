@@ -42,7 +42,7 @@ func (v Video) Download() (Video, error) {
 	}
 
 	// push video info to consumer
-	if err := rmq.RMQPublisherClient.Publish("video", v); err != nil {
+	if err := rmq.GetClient().Publish("video", v); err != nil {
 		log.Println(err)
 	}
 	return v, nil

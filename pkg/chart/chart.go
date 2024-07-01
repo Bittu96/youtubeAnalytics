@@ -3,41 +3,41 @@ package chart
 import (
 	"log"
 	"os"
+	"path/filepath"
 
 	"github.com/go-echarts/go-echarts/v2/charts"
 	"github.com/go-echarts/go-echarts/v2/opts"
 )
 
-type Plot struct {
-	X string
-	Y opts.BarData
+type InsightPlots struct {
+	VideoIds    []string
+	Views       []opts.BarData
+	Likes       []opts.BarData
+	Comments    []opts.BarData
+	Impressions []opts.BarData
 }
 
-func getBarItems(plots []Plot) (Xdata []string, Ydata []opts.BarData) {
-	xItems := make([]string, 0)
-	yItems := make([]opts.BarData, 0)
-
-	for _, plot := range plots {
-		xItems = append(xItems, plot.X)
-		yItems = append(yItems, plot.Y)
-	}
-	return xItems, yItems
-}
-
-func ViewInsights(plotName string, plots []Plot) {
+func RenderInsights(plotName string, plots InsightPlots) {
 	bar := charts.NewBar()
 
 	bar.SetGlobalOptions(charts.WithTitleOpts(opts.Title{
 		Title:    "Youtube Analytics",
-		Subtitle: "Views Counts",
+		Subtitle: "Todays Channel Insights",
+	}), charts.WithXAxisOpts(opts.XAxis{
+		AxisLabel: &opts.AxisLabel{Show: true, Rotate: 90, Interval: "0"},
 	}))
 
-	xData, yData := getBarItems(plots)
-	bar.SetXAxis(xData).AddSeries("Category A", yData)
+	// xData, yData := getBarItems(plots)
+	bar.SetXAxis(plots.VideoIds).
+		AddSeries("views", plots.Views).
+		AddSeries("likes", plots.Likes).
+		AddSeries("comments", plots.Comments).
+		AddSeries("impressions", plots.Impressions)
 
-	f, _ := os.Create(plotName)
-	err := bar.Render(f)
-	log.Panic(err)
+	f, _ := os.Create(filepath.Join("data", plotName))
+	if err := bar.Render(f); err != nil {
+		log.Panic(err)
+	}
 }
 
 // generate random data for bar chart

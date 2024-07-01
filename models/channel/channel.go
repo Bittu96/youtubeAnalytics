@@ -44,7 +44,7 @@ func (c Channel) Download() (Channel, error) {
 			}
 
 			// push channel info to consumer
-			if err := rmq.RMQPublisherClient.Publish("channel", c); err != nil {
+			if err := rmq.GetClient().Publish("channel", c); err != nil {
 				return Channel{}, err
 			}
 		}

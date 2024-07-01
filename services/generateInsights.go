@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"time"
 	"youtubeAnalytics/models/channel"
 	"youtubeAnalytics/pkg/database"
 	"youtubeAnalytics/pkg/keyword"
@@ -90,8 +91,7 @@ func getTopKeywords(c channel.Channel) (topKeywords []string) {
 // }
 
 func GenerateVideoInsights() error {
-	queryFilePath := filepath.Join("pkg", "database", "queries", "videoInsightsQuery.sql")
-
+	queryFilePath := filepath.Join("pkg", "database", "queries", "generateVideoInsightsQuery.sql")
 	c, err := os.ReadFile(queryFilePath)
 	if err != nil {
 		return err
@@ -100,7 +100,7 @@ func GenerateVideoInsights() error {
 	videoInsightsQuery := string(c)
 	fmt.Println(videoInsightsQuery)
 
-	rows, err := database.DBClient.Query(videoInsightsQuery)
+	rows, err := database.GetClient().Query(videoInsightsQuery)
 	if err != nil {
 		return err
 	}
@@ -140,6 +140,7 @@ type videoInsights struct {
 	commentCountIncPerc       float64
 	totalImpressionsCount     int64
 	totalImpressionsCountPerc float64
+	addedDate                 time.Time
 }
 
 func calculateInsights(vs videoStats) videoInsights {
@@ -179,7 +180,7 @@ func writeVideoInsightsToDB(v videoInsights) {
 }
 
 func runQuery(query string) {
-	res, err := database.DBClient.Exec(query)
+	res, err := database.GetClient().Exec(query)
 	if err != nil {
 		log.Println(err)
 	} else {
