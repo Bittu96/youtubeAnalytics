@@ -24,8 +24,8 @@ func main() {
 	})
 
 	routes.GET("/insights", func(c *gin.Context) {
-		routes.LoadHTMLFiles("data/videotest.html")
-		c.HTML(http.StatusOK, "videotest.html", gin.H{
+		routes.LoadHTMLFiles("data/insights_demo.html")
+		c.HTML(http.StatusOK, "insights_demo.html", gin.H{
 			"content": "welcome to youtube analytics",
 		})
 	})
