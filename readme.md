@@ -75,6 +75,10 @@ Start the publisher
 make run-publisher
 ```
 
+## Demo
+
+![plot](insights_demo.png)
+
 ## Youtube DATA API list for references
 
 ### Channels:
