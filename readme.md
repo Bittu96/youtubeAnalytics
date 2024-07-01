@@ -77,7 +77,7 @@ make run-publisher
 
 ## Demo
 
-![plot](insights_demo.png)
+![plot](./data/insights_demo.png)
 
 ## Youtube DATA API list for references
 
