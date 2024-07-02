@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"log"
+	"sync"
 	"time"
 
 	_ "github.com/lib/pq"
@@ -16,6 +17,7 @@ type DB struct {
 	password string
 	dbname   string
 	conn     *sql.DB
+	mux      *sync.Mutex
 }
 
 // global db client variable
@@ -29,6 +31,7 @@ func New(host string, port int, user, password, dbname string) {
 		user:     user,
 		password: password,
 		dbname:   dbname,
+		mux:      &sync.Mutex{},
 	}
 	fmt.Println(dbClient)
 }
@@ -62,9 +65,13 @@ func (db *DB) Connect() (err error) {
 
 func GetClient() *sql.DB {
 	if dbClient.conn == nil {
-		for dbClient.Connect() != nil {
-			time.Sleep(time.Second)
+		dbClient.mux.Lock()
+		if dbClient.conn == nil {
+			for dbClient.Connect() != nil {
+				time.Sleep(time.Second)
+			}
 		}
+		dbClient.mux.Unlock()
 	}
 
 	return dbClient.conn

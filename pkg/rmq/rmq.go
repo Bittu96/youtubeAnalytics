@@ -2,6 +2,7 @@ package rmq
 
 import (
 	"log"
+	"sync"
 	"time"
 
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -13,6 +14,7 @@ type RMQ struct {
 	conn      *amqp.Connection
 	channel   *amqp.Channel
 	queue     amqp.Queue
+	mux       *sync.Mutex
 }
 
 const (
@@ -24,7 +26,10 @@ const (
 var rmqClient *RMQ
 
 func New(url, queueName string) {
-	rmqClient = &RMQ{url: url, queueName: queueName}
+	rmqClient = &RMQ{
+		url:       url,
+		queueName: queueName,
+		mux:       &sync.Mutex{}}
 }
 
 func (r *RMQ) Connect() (err error) {
@@ -58,6 +63,7 @@ func (r *RMQ) Connect() (err error) {
 		return err
 	}
 
+	log.Println("rmq connection success!")
 	return nil
 }
 
@@ -70,9 +76,13 @@ func (r *RMQ) Connect() (err error) {
 
 func GetClient() *RMQ {
 	if rmqClient.conn == nil || rmqClient.channel == nil || rmqClient.queue.Name == "" {
-		for rmqClient.Connect() != nil {
-			time.Sleep(time.Second)
+		rmqClient.mux.Lock()
+		if rmqClient.conn == nil || rmqClient.channel == nil || rmqClient.queue.Name == "" {
+			for rmqClient.Connect() != nil {
+				time.Sleep(time.Second)
+			}
 		}
+		rmqClient.mux.Unlock()
 	}
 
 	return rmqClient
