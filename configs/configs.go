@@ -4,8 +4,18 @@ import (
 	"log"
 	"os"
 	"strconv"
+	"time"
 
 	"github.com/joho/godotenv"
+)
+
+const (
+	// client connections
+	MaxRetryCount = 10
+	RetryInterval = 2 * time.Second
+
+	// cron
+	CronInterval = 5 * time.Second
 )
 
 var (

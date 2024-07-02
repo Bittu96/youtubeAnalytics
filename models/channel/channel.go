@@ -51,7 +51,7 @@ func (c Channel) Download() (Channel, error) {
 	}
 
 	// download all videos from only channel uploads section by default
-	if err = c.UploadsDownloader(channelAPIResponse.Items[0].ContentDetails.RelatedPlaylists.Uploads); err != nil {
+	if err = c.uploadsDownloader(channelAPIResponse.Items[0].ContentDetails.RelatedPlaylists.Uploads); err != nil {
 		return Channel{}, err
 	}
 
@@ -65,6 +65,7 @@ func (c Channel) Download() (Channel, error) {
 	return c, nil
 }
 
+// downlaod all playlists of this channel
 func (c *Channel) downloadAllPlaylists() error {
 	wg := &sync.WaitGroup{}
 	mux := &sync.Mutex{}
@@ -78,7 +79,7 @@ func (c *Channel) downloadAllPlaylists() error {
 		nextPageToken = playlistCollectionAPIResponse.NextPageToken
 		for _, playlistItem := range playlistCollectionAPIResponse.Items {
 			wg.Add(1)
-			go c.PlaylistDownloader(wg, mux, playlistItem.ID)
+			go c.playlistDownloader(wg, mux, playlistItem.ID)
 		}
 		wg.Wait()
 	}
@@ -93,7 +94,7 @@ func (c *Channel) downloadAllPlaylists() error {
 			nextPageToken = playlistCollectionAPIResponse.NextPageToken
 			for _, playlistItem := range playlistCollectionAPIResponse.Items {
 				wg.Add(1)
-				go c.PlaylistDownloader(wg, mux, playlistItem.ID)
+				go c.playlistDownloader(wg, mux, playlistItem.ID)
 			}
 			wg.Wait()
 		}
@@ -103,18 +104,20 @@ func (c *Channel) downloadAllPlaylists() error {
 }
 
 // download playlist data
-func (c *Channel) PlaylistDownloader(wg *sync.WaitGroup, mux *sync.Mutex, playlistId string) {
+func (c *Channel) playlistDownloader(wg *sync.WaitGroup, mux *sync.Mutex, playlistId string) {
 	defer func() { wg.Done() }()
 	newPlaylist, err := playlist.New(playlistId).Download()
 	if err != nil {
 		return
 	}
 
+	mux.Lock()
 	c.Playlists = append(c.Playlists, newPlaylist)
+	mux.Unlock()
 }
 
 // download uploads data
-func (c *Channel) UploadsDownloader(playlistId string) error {
+func (c *Channel) uploadsDownloader(playlistId string) error {
 	newPlaylist, err := playlist.New(playlistId).Download()
 	if err != nil {
 		return err

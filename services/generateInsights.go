@@ -16,10 +16,10 @@ import (
 
 func generateInsights(c channel.Channel) error {
 	// extract top keys
-	topKeyWords := getTopKeywords(c)
+	topKeyWords := getTopKeywordsFromChannel(c)
 	fmt.Println(topKeyWords)
 
-	// get channelInsights
+	// get channelInsights //todo in future
 	// if err := generateChannelInsights(); err != nil {
 	// 	return err
 	// }
@@ -32,8 +32,11 @@ func generateInsights(c channel.Channel) error {
 	return nil
 }
 
-func getTopKeywords(c channel.Channel) (topKeywords []string) {
+// get top keywords from video titles and descriptions
+func getTopKeywordsFromChannel(c channel.Channel) (topKeywords []string) {
 	keywordFreqMap := make(map[string]int)
+
+	// write frequencies of keywords to map
 	for _, p := range c.Playlists {
 		for _, v := range p.Videos {
 			videoKeywords := keyword.Extract(v.Details.Title + v.Details.Description)
@@ -50,12 +53,14 @@ func getTopKeywords(c channel.Channel) (topKeywords []string) {
 		}
 	}
 
+	// create freq array and place keywords
 	var freqSlice = make([][]string, maxFreq+1)
 	for keyword, freq := range keywordFreqMap {
 		freqSlice[freq] = append(freqSlice[freq], keyword)
 	}
 
 	fmt.Println(freqSlice)
+	// get top 10 keywords from the
 	for i := maxFreq - 1; i > 0; i-- {
 		topKeywords = append(topKeywords, freqSlice[i]...)
 		if len(topKeywords) > 10 {
@@ -66,7 +71,7 @@ func getTopKeywords(c channel.Channel) (topKeywords []string) {
 	return
 }
 
-// func generateChannelInsights() error {
+// func generateChannelInsights() error { //tooo later
 // 	rows, err := database.DBClient.Query("")
 // 	if err != nil {
 // 		return err

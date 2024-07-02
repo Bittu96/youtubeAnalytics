@@ -1,12 +1,15 @@
-package mycron
+package myCron
 
-// pass in your specific zone name, using USA/LA as example
-// customLocation := time.LoadLocation("America/Los_Angeles")
+import (
+	"fmt"
+	"time"
+)
 
-// // initialize new cron job runner with custom location
-// cronHandler := cron.NewWithLocation(customLocation)
+func Start(interval time.Duration, task func()) {
+	ticker := time.NewTicker(interval)
 
-// // the 0/24th hour and 5th minute of every day
-// cronHandler.AddFunc("5 0 * * * *", func() {
-//     fmt.Println("crontab ping")
-// })
+	for t := range ticker.C {
+		fmt.Println("Tick at", t)
+		task()
+	}
+}

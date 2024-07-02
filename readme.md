@@ -44,7 +44,7 @@ pkg/database/schema.sql
 rename mock_env.file to .env and update env values
 
 ```bash
-pkg/database/schema.sql
+.mock_env -> .env
 ```
 
 Install Go dependencies

@@ -9,3 +9,7 @@ func Warn(msg string) {
 func Error(msg string) {
 	log.Error(msg)
 }
+
+func Info(msg string) {
+	log.Info(msg)
+}
