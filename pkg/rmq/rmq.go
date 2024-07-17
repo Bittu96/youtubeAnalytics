@@ -26,10 +26,12 @@ const (
 var rmqClient *RMQ
 
 func New(url, queueName string) {
-	rmqClient = &RMQ{
-		url:       url,
-		queueName: queueName,
-		mux:       &sync.Mutex{}}
+	if rmqClient == nil {
+		rmqClient = &RMQ{
+			url:       url,
+			queueName: queueName,
+			mux:       &sync.Mutex{}}
+	}
 }
 
 func (r *RMQ) Connect() (err error) {

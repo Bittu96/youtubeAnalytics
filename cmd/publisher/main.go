@@ -7,11 +7,11 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 	"youtubeAnalytics/configs"
 	"youtubeAnalytics/pkg/database"
 	"youtubeAnalytics/pkg/myCron"
 	"youtubeAnalytics/pkg/rmq"
+	"youtubeAnalytics/services"
 
 	"github.com/gin-gonic/gin"
 )
@@ -54,8 +54,8 @@ func main() {
 	// start my cron
 	go myCron.Start(configs.CronInterval, func() {
 		// process target channels
-		// services.ProcessChannels(targetChannels)
-		// services.RenderVideoInsights()
+		services.ProcessChannels(targetChannels)
+		services.RenderVideoInsights()
 	})
 
 	// start my server
@@ -104,7 +104,7 @@ func gracefulShutdown(task func(ctx context.Context)) {
 	<-quit
 
 	log.Println("shutdown initated")
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), configs.ShutdownDelay)
 	defer cancel()
 
 	task(ctx)

@@ -15,7 +15,10 @@ const (
 	RetryInterval = 2 * time.Second
 
 	// cron
-	CronInterval = 5 * time.Second
+	CronInterval = 1 * time.Minute
+
+	// shutodown delay
+	ShutdownDelay = 2 * time.Second
 )
 
 var (

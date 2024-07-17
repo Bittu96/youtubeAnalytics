@@ -25,13 +25,15 @@ var dbClient *DB
 
 // create new db
 func New(host string, port int, user, password, dbname string) {
-	dbClient = &DB{
-		host:     host,
-		port:     port,
-		user:     user,
-		password: password,
-		dbname:   dbname,
-		mux:      &sync.Mutex{},
+	if dbClient == nil {
+		dbClient = &DB{
+			host:     host,
+			port:     port,
+			user:     user,
+			password: password,
+			dbname:   dbname,
+			mux:      &sync.Mutex{},
+		}
 	}
 	fmt.Println(dbClient)
 }
