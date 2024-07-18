@@ -1,6 +1,6 @@
 # Youtube Analytics
 
-A brief description of what this project does and who it's for
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=Bittu96_youtubeAnalytics&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=Bittu96_youtubeAnalytics)
 
 ## Tech Stack
 
